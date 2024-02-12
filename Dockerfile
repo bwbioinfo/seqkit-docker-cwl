@@ -17,4 +17,4 @@ ENV PATH=/opt/miniconda3/bin:${PATH}
 RUN conda install -c bioconda seqkit
 RUN seqkit version
 
-ENTRYPOINT [ "seqkit" ]
+CMD [ "seqkit" ]
