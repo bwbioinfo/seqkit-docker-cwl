@@ -6,9 +6,12 @@ process SEQKIT_STATS {
         path fastx_file
         val options
 
+    output:
+        path 'stats.txt'
+
     script:
         """
-        seqkit stats ${options} ${fastx_file} 
+        seqkit stats ${options} ${fastx_file} > stats.txt
         """
 }
 
@@ -19,6 +22,9 @@ process SEQKIT_INDEX {
     input:
         path fastx_file
         val options
+
+    output:
+        path 'stats.txt'
 
     script:
         """
