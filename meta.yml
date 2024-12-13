@@ -1,0 +1,4 @@
+name: seqkit
+description: "Processes POD5 files using the POD5 tools"
+keywords:
+  - seqkit
