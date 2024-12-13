@@ -1,7 +1,13 @@
 FROM rockylinux/rockylinux:9.1
 
 RUN dnf -y update && \
-    dnf -y install wget bzip2 python3-devel python3-pip gcc-c++ 
+    dnf -y install \
+    wget \
+    bzip2 \
+    python3-devel \
+    python3-pip \
+    gcc-c++ \
+    procps
 
 WORKDIR /opt/
 RUN mkdir -p miniconda3
