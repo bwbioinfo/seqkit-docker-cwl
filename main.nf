@@ -2,16 +2,18 @@ process SEQKIT_STATS {
     // TODO : SET FIXED VERSION WHEN PIPELINE IS STABLE
     container 'ghcr.io/bwbioinfo/seqkit-docker-cwl:latest'
 
+    publishDir "output", mode: 'copy'
+
     input:
         path fastx_file
         val options
 
     output:
-        path 'stats.txt'
+        path 'stats.txt', emit: stats
 
     script:
         """
-        seqkit stats ${options} ${fastx_file} > stats.txt
+        seqkit stats ${options} -To stats.txt ${fastx_file}
         """
 }
 
