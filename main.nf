@@ -2,51 +2,128 @@ process SEQKIT_STATS {
     // TODO : SET FIXED VERSION WHEN PIPELINE IS STABLE
     container 'ghcr.io/bwbioinfo/seqkit-docker-cwl:latest'
 
+    tag "$meta.id"
+    label 'process_low'
+
     publishDir "output", mode: 'copy'
 
     input:
-        path fastx_file
-        val options
+    tuple val(meta), path(reads)
 
     output:
-        path 'stats.txt', emit: stats
+    tuple val(meta), path("*.tsv"), emit: stats
+    path "versions.yml"           , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
-        """
-        seqkit stats ${options} -To stats.txt ${fastx_file}
-        """
+    def args = task.ext.args ?: '--all'
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    seqkit stats \\
+        --tabular \\
+        $args \\
+        $reads -o '${prefix}.tsv'
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        seqkit: \$( seqkit version | sed 's/seqkit v//' )
+    END_VERSIONS
+    """
 }
 
 process SEQKIT_INDEX {
     // TODO : SET FIXED VERSION WHEN PIPELINE IS STABLE
     container 'ghcr.io/bwbioinfo/seqkit-docker-cwl:latest'
 
+
+    tag "$meta.id"
+    label 'process_index'
+
+    publishDir "output", mode: 'copy'
+
     input:
-        path fasta_file
-        val options
+    tuple val(meta), path(fasta)
 
     output:
-        path "${fasta_file}.fai"
+    tuple val(meta), path("*.fai"), emit: fasta_index
+    path "versions.yml", emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
-        """
-        seqkit faidx ${options} ${fasta_file} > ${fasta_file}.fai
-        """
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+    """
+    seqkit \\
+        faidx \\
+        $args \\
+        $fasta
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        seqkit: \$( seqkit | sed '3!d; s/Version: //' )
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        seqkit: \$( seqkit | sed '3!d; s/Version: //' )
+    END_VERSIONS
+    """
 }
 
 process SEQKIT_FQ2FA {
     // TODO : SET FIXED VERSION WHEN PIPELINE IS STABLE
     container 'ghcr.io/bwbioinfo/seqkit-docker-cwl:latest'
 
+    tag "$meta.id"
+    label 'process_single'
+
+    publishDir "output", mode: 'copy'
+
     input:
-        path fastq_file
-        val options
+    tuple val(meta), path(fastq)
 
     output:
-        path "${fastq_file.simpleName.split("\\.")[0]}.fa"
+    tuple val(meta), path("*.fa.gz"), emit: fasta
+    path "versions.yml"             , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
 
     script:
-        """
-        seqkit fq2fa ${options} ${fastq_file} -o ${fastq_file.simpleName.split('\\.')[0]}.fa
-        """
+    def args = task.ext.args ?: ''
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+    """
+    seqkit \\
+        fq2fa \\
+        $args \\
+        -j $task.cpus \\
+        -o ${prefix}.fa.gz \\
+        $fastq
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        seqkit: \$( seqkit | sed '3!d; s/Version: //' )
+    END_VERSIONS
+    """
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    """
+    echo "" | gzip > ${prefix}.fa.gz
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        seqkit: \$( seqkit | sed '3!d; s/Version: //' )
+    END_VERSIONS
+    """
 }
