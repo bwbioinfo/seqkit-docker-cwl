@@ -3,7 +3,9 @@ process SEQKIT_STATS {
     container 'ghcr.io/bwbioinfo/seqkit-docker-cwl:latest'
 
     tag "$meta.id"
-    label 'process_low'
+    label 'process_cpu_low'
+    label 'process_memory_low'
+    label 'process_time_low'
 
     publishDir "output", mode: 'copy'
 
@@ -55,8 +57,6 @@ process SEQKIT_INDEX {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.id}"
-
     """
     seqkit \\
         faidx \\
@@ -70,7 +70,6 @@ process SEQKIT_INDEX {
     """
 
     stub:
-    def prefix = task.ext.prefix ?: "${meta.id}"
     """
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
