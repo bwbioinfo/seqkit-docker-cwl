@@ -7,8 +7,6 @@ process SEQKIT_STATS {
     label 'process_memory_low'
     label 'process_time_low'
 
-    publishDir "output", mode: 'copy'
-
     input:
     tuple val(meta), path(reads)
 
@@ -42,8 +40,6 @@ process SEQKIT_INDEX {
 
     tag "$meta.id"
     label 'process_index'
-
-    publishDir "output", mode: 'copy'
 
     input:
     tuple val(meta), path(fasta)
@@ -84,8 +80,6 @@ process SEQKIT_FQ2FA {
 
     tag "$meta.id"
     label 'process_single'
-
-    publishDir "output", mode: 'copy'
 
     input:
     tuple val(meta), path(fastq)
